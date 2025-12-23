@@ -6,166 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NOEL_V2</title>
-    <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-            background-color: #000000;
-            font-family: 'Times New Roman', serif;
-        }
-
-        #canvas-container {
-            width: 100vw;
-            height: 100vh;
-            position: absolute;
-            top: 0;
-            left: 0;
-            z-index: 1;
-        }
-
-        /* UI Overlay - Minimalist */
-        #ui-layer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 10;
-            pointer-events: none;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding-top: 40px;
-            box-sizing: border-box;
-            /* Remove transition here as we don't hide the whole layer anymore */
-        }
-
-        /* When hidden class is applied to specific elements */
-        .ui-hidden {
-            opacity: 0;
-            pointer-events: none !important;
-        }
-
-        /* Loading */
-        #loader {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #000;
-            z-index: 100;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            transition: opacity 0.8s ease-out;
-        }
-
-        .loader-text {
-            color: #d4af37;
-            font-size: 14px;
-            letter-spacing: 4px;
-            margin-top: 20px;
-            text-transform: uppercase;
-            font-weight: 100;
-        }
-
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 1px solid rgba(212, 175, 55, 0.2);
-            border-top: 1px solid #d4af37;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        /* Typography - Centerpiece */
-        h1 {
-            color: #fceea7;
-            font-size: 56px;
-            margin: 0;
-            font-weight: 400;
-            letter-spacing: 6px;
-            text-shadow: 0 0 50px rgba(252, 238, 167, 0.6);
-            background: linear-gradient(to bottom, #fff, #eebb66);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-family: 'Cinzel', 'Times New Roman', serif;
-            opacity: 0.9;
-            transition: opacity 0.5s ease;
-            /* Ensure smooth transitions if needed */
-        }
-
-        /* Upload Button - Restored & Elegant */
-        .upload-wrapper {
-            margin-top: 20px;
-            pointer-events: auto;
-            text-align: center;
-            transition: opacity 0.5s ease;
-            /* Add transition for smooth hiding */
-        }
-
-        .upload-btn {
-            background: rgba(20, 20, 20, 0.6);
-            border: 1px solid rgba(212, 175, 55, 0.4);
-            color: #d4af37;
-            padding: 10px 25px;
-            cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            font-size: 10px;
-            transition: all 0.4s;
-            display: inline-block;
-            backdrop-filter: blur(5px);
-        }
-
-        .upload-btn:hover {
-            background: #d4af37;
-            color: #000;
-            box-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
-        }
-
-        .hint-text {
-            color: rgba(212, 175, 55, 0.5);
-            font-size: 9px;
-            margin-top: 8px;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-
-        #file-input {
-            display: none;
-        }
-
-        /* Webcam feedback */
-        #webcam-wrapper {
-            position: absolute;
-            bottom: 40px;
-            right: 40px;
-            width: 120px;
-            height: 90px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            overflow: hidden;
-            opacity: 0;
-            /* Hidden by default but functional */
-            pointer-events: none;
-        }
-    </style>
-
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap');
-    </style>
+    <link rel="stylesheet" href="noel_v2.css">
 
     <script type="importmap">
         {
@@ -188,21 +29,21 @@
     <div id="canvas-container"></div>
 
     <div id="ui-layer">
-        <h1>Giáng Sinh An Lành</h1>
+        <h1> GIÁNG SINH VUI VẺ</h1>
 
         <div class="upload-wrapper">
             <label class="upload-btn">
                 Thêm ảnh
                 <input type="file" id="file-input" multiple accept="image/*">
             </label>
-            <div class="hint-text">Nhấn phím 'H' để ẩn các nút điều khiển</div>
+            <div class="hint-text">Nắm tay (✊) -> Cây thông | Giơ 2 ngón (✌️) -> Trái tim | Nhấn 'H' để ẩn</div>
         </div>
     </div>
 
     <!-- Webcam hidden structure -->
     <div id="webcam-wrapper">
-        <video id="webcam" autoplay playsinline style="display:none;"></video>
-        <canvas id="webcam-preview"></canvas>
+        <video id="webcam" autoplay playsinline style="width: 1px; height: 1px; opacity: 0;"></video>
+        <canvas id="webcam-preview" style="display:none;"></canvas>
     </div>
 
     <script type="module">
@@ -217,10 +58,12 @@
         // --- CONFIGURATION ---
         const CONFIG = {
             colors: {
-                bg: 0x000000,
+                bg: 0x1a2a44,
                 champagneGold: 0xffd966,
-                deepGreen: 0x03180a,
+                vibrantGreen: 0x228b22,
                 accentRed: 0x990000,
+                snowWhite: 0xffffff,
+                pinkHeart: 0xff69b4,
             },
             particles: {
                 count: 1500,
@@ -248,6 +91,7 @@
         let photoMeshGroup = new THREE.Group();
         let handLandmarker, video, webcamCanvas, webcamCtx;
         let caneTexture;
+        const tmpVec = new THREE.Vector3(); // Reusable vector
 
         async function init() {
             initThree();
@@ -264,27 +108,11 @@
             loader.style.opacity = 0;
             setTimeout(() => loader.remove(), 800);
 
-            loadPredefinedImages();
             animate();
         }
 
         function loadPredefinedImages() {
-            const images = ['1.jpg', '2.png', '3.png'];
-            console.log("Starting to load predefined images:", images);
-            images.forEach(path => {
-                new THREE.TextureLoader().load(
-                    path,
-                    (t) => {
-                        console.log("Successfully loaded image:", path);
-                        t.colorSpace = THREE.SRGBColorSpace;
-                        addPhotoToScene(t);
-                    },
-                    undefined,
-                    (err) => {
-                        console.error("Failed to load image:", path, err);
-                    }
-                );
-            });
+            // No predefined images - user will upload their own
         }
 
         function initThree() {
@@ -373,6 +201,7 @@
 
                 this.posTree = new THREE.Vector3();
                 this.posScatter = new THREE.Vector3();
+                this.posHeart = new THREE.Vector3();
                 this.baseScale = mesh.scale.x;
 
                 // Individual Spin Speed
@@ -410,12 +239,40 @@
                     rScatter * Math.sin(phi) * Math.sin(theta),
                     rScatter * Math.cos(phi)
                 );
+
+                // HEART: 3D Filled Heart Shape
+                const tHeart = Math.random() * Math.PI * 2;
+                const rHeart = Math.sqrt(Math.random()); // Radius factor to fill the interior
+                let heartScale = 0.8;
+
+                if (this.type === 'PHOTO') heartScale *= 0.6;
+
+                const heartX = rHeart * 16 * Math.pow(Math.sin(tHeart), 3);
+                const heartY = rHeart * (13 * Math.cos(tHeart) - 5 * Math.cos(2 * tHeart) - 2 * Math.cos(3 * tHeart) - Math.cos(4 * tHeart));
+                const heartZ = (Math.random() - 0.5) * (this.type === 'PHOTO' ? 4 : 12) * Math.pow(rHeart, 0.5);
+                this.posHeart.set(heartX * heartScale, (heartY * heartScale) + 2, heartZ * heartScale);
             }
 
-            update(dt, mode, focusTargetMesh) {
+            update(dt, mode, focusTargetMesh, heartPulse = 1.0) {
                 let target = this.posTree;
 
                 if (mode === 'SCATTER') target = this.posScatter;
+                else if (mode === 'HEART') {
+                    if (this.type === 'PINK_HEART') {
+                        // Flying around orbit logic
+                        const time = clock.elapsedTime * 0.5 + this.mesh.id;
+                        const orbitR = 15 + Math.sin(time * 0.5) * 5;
+                        tmpVec.set(
+                            Math.cos(time) * orbitR,
+                            Math.sin(time * 0.7) * orbitR + 2,
+                            Math.sin(time) * orbitR
+                        );
+                        target = tmpVec;
+                    } else {
+                        tmpVec.copy(this.posHeart).multiplyScalar(heartPulse);
+                        target = tmpVec;
+                    }
+                }
                 else if (mode === 'FOCUS') {
                     if (this.mesh === focusTargetMesh) {
                         const desiredWorldPos = new THREE.Vector3(0, 2, 35);
@@ -452,14 +309,14 @@
                     s = this.baseScale * (0.8 + 0.4 * Math.sin(clock.elapsedTime * 4 + this.mesh.id));
                     if (mode === 'TREE') s = 0;
                 } else if (this.type === 'PHOTO') {
-                    // Tree mode or other modes: make photos stand out
-                    s = this.baseScale * (mode === 'TREE' ? 4.0 : 2.5);
+                    s = this.baseScale * (mode === 'TREE' ? 0.6 : 2.5);
                 } else if (mode === 'FOCUS') {
                     if (this.mesh === focusTargetMesh) s = 4.5;
                     else s = this.baseScale * 0.8;
                 }
 
-                this.mesh.scale.lerp(new THREE.Vector3(s, s, s), 4 * dt);
+                tmpVec.setScalar(s);
+                this.mesh.scale.lerp(tmpVec, 4 * dt);
             }
         }
 
@@ -482,10 +339,10 @@
             });
 
             const greenMat = new THREE.MeshStandardMaterial({
-                color: CONFIG.colors.deepGreen,
-                metalness: 0.2, roughness: 0.8,
-                emissive: 0x002200,
-                emissiveIntensity: 0.2
+                color: CONFIG.colors.vibrantGreen,
+                metalness: 0.2, roughness: 0.5,
+                emissive: 0x113311,
+                emissiveIntensity: 0.3
             });
 
             const redMat = new THREE.MeshPhysicalMaterial({
@@ -496,22 +353,55 @@
 
             const candyMat = new THREE.MeshStandardMaterial({ map: caneTexture, roughness: 0.4 });
 
+            const whiteMat = new THREE.MeshStandardMaterial({
+                color: CONFIG.colors.snowWhite,
+                roughness: 0.1,
+                metalness: 0.5,
+                emissive: 0xaaaaaa,
+                emissiveIntensity: 0.2
+            });
+
+            const pinkMat = new THREE.MeshStandardMaterial({
+                color: CONFIG.colors.pinkHeart,
+                roughness: 0.2,
+                metalness: 0.3,
+                emissive: 0xff2266,
+                emissiveIntensity: 0.4
+            });
+
+            // Small Heart Shape for particles
+            const smallHeartShape = new THREE.Shape();
+            smallHeartShape.moveTo(0, 0);
+            smallHeartShape.bezierCurveTo(0, 0.5, 0.8, 1, 0.8, 0);
+            smallHeartShape.bezierCurveTo(0.8, -0.8, 0, -1, 0, -1.8);
+            smallHeartShape.bezierCurveTo(0, -1, -0.8, -0.8, -0.8, 0);
+            smallHeartShape.bezierCurveTo(-0.8, 1, 0, 0.5, 0, 0);
+            const heartGeo = new THREE.ExtrudeGeometry(smallHeartShape, { depth: 0.1, bevelEnabled: false });
+
             for (let i = 0; i < CONFIG.particles.count; i++) {
                 const rand = Math.random();
                 let mesh, type;
 
-                if (rand < 0.40) {
+                if (rand < 0.30) {
                     mesh = new THREE.Mesh(boxGeo, greenMat);
                     type = 'BOX';
-                } else if (rand < 0.70) {
+                } else if (rand < 0.50) {
                     mesh = new THREE.Mesh(boxGeo, goldMat);
                     type = 'GOLD_BOX';
-                } else if (rand < 0.92) {
+                } else if (rand < 0.65) {
+                    mesh = new THREE.Mesh(sphereGeo, whiteMat);
+                    type = 'WHITE_SPHERE';
+                } else if (rand < 0.78) {
                     mesh = new THREE.Mesh(sphereGeo, goldMat);
                     type = 'GOLD_SPHERE';
-                } else if (rand < 0.97) {
+                } else if (rand < 0.85) {
                     mesh = new THREE.Mesh(sphereGeo, redMat);
                     type = 'RED';
+                } else if (rand < 0.95) {
+                    // PINK HEARTS - Now with real heart shape
+                    mesh = new THREE.Mesh(heartGeo, pinkMat);
+                    mesh.rotation.x = Math.PI; // Flip to right side up
+                    type = 'PINK_HEART';
                 } else {
                     mesh = new THREE.Mesh(candyGeo, candyMat);
                     type = 'CANE';
@@ -525,14 +415,35 @@
                 particleSystem.push(new Particle(mesh, type, false));
             }
 
-            const starGeo = new THREE.OctahedronGeometry(1.2, 0);
+            // Star Shape - 5 points
+            const starShape = new THREE.Shape();
+            const points = 5;
+            const outerRadius = 1.5;
+            const innerRadius = 0.6;
+            for (let i = 0; i < points * 2; i++) {
+                const radius = i % 2 === 0 ? outerRadius : innerRadius;
+                const angle = (i * Math.PI) / points;
+                const x = Math.cos(angle) * radius;
+                const y = Math.sin(angle) * radius;
+                if (i === 0) starShape.moveTo(x, y);
+                else starShape.lineTo(x, y);
+            }
+            starShape.closePath();
+
+            const starGeo = new THREE.ExtrudeGeometry(starShape, { depth: 0.3, bevelEnabled: true, bevelThickness: 0.1, bevelSize: 0.1 });
             const starMat = new THREE.MeshStandardMaterial({
-                color: 0xffdd88, emissive: 0xffaa00, emissiveIntensity: 1.0,
-                metalness: 1.0, roughness: 0
+                color: 0xffdd88, emissive: 0xffaa00, emissiveIntensity: 2.0,
+                metalness: 1.0, roughness: 0.1
             });
             const star = new THREE.Mesh(starGeo, starMat);
             star.position.set(0, CONFIG.particles.treeHeight / 2 + 1.2, 0);
+            // Stand upright (facing front)
             mainGroup.add(star);
+
+            // Add point light for star
+            const starLight = new THREE.PointLight(0xffaa00, 5, 10);
+            starLight.position.copy(star.position);
+            mainGroup.add(starLight);
 
             mainGroup.add(photoMeshGroup);
         }
@@ -549,6 +460,25 @@
             }
         }
         function addPhotoToScene(texture) {
+            // 1. Fix Blurriness: Increase texture quality
+            texture.generateMipmaps = true;
+            texture.minFilter = THREE.LinearMipmapLinearFilter;
+            texture.magFilter = THREE.LinearFilter;
+            texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+
+            // 2. Fix Distortion: Center Crop (Cover) logic
+            const image = texture.image;
+            const aspect = image.width / image.height;
+            if (aspect > 1) {
+                // Landscape: Clip sides
+                texture.repeat.set(1 / aspect, 1);
+                texture.offset.set((1 - (1 / aspect)) / 2, 0);
+            } else {
+                // Portrait: Clip top/bottom
+                texture.repeat.set(1, aspect);
+                texture.offset.set(0, (1 - aspect) / 2);
+            }
+
             const frameGeo = new THREE.BoxGeometry(1.4, 1.4, 0.05);
             const frameMat = new THREE.MeshStandardMaterial({ color: CONFIG.colors.champagneGold, metalness: 1.0, roughness: 0.1 });
             const frame = new THREE.Mesh(frameGeo, frameMat);
@@ -562,7 +492,7 @@
             group.add(frame);
             group.add(photo);
 
-            const s = 1.2;
+            const s = 1.5; // Slightly larger for better viewing
             group.scale.set(s, s, s);
 
             photoMeshGroup.add(group);
@@ -611,17 +541,23 @@
         }
 
         let lastVideoTime = -1;
+        let lastDetectTime = 0;
+        const DETECT_INTERVAL = 60; // Run AI every 60ms (~16fps) - plenty for gestures
+
         async function predictWebcam() {
-            if (video.currentTime !== lastVideoTime) {
+            const now = performance.now();
+            if (video.currentTime !== lastVideoTime && now - lastDetectTime > DETECT_INTERVAL) {
                 lastVideoTime = video.currentTime;
+                lastDetectTime = now;
                 if (handLandmarker) {
-                    const result = handLandmarker.detectForVideo(video, performance.now());
+                    const result = handLandmarker.detectForVideo(video, now);
                     processGestures(result);
                 }
             }
             requestAnimationFrame(predictWebcam);
         }
 
+        let gestureScore = { TREE: 0, SCATTER: 0, HEART: 0, FOCUS: 0 };
         function processGestures(result) {
             if (result.landmarks && result.landmarks.length > 0) {
                 STATE.hand.detected = true;
@@ -629,26 +565,57 @@
                 STATE.hand.x = (lm[9].x - 0.5) * 2;
                 STATE.hand.y = (lm[9].y - 0.5) * 2;
 
-                const thumb = lm[4]; const index = lm[8]; const wrist = lm[0];
-                const pinchDist = Math.hypot(thumb.x - index.x, thumb.y - index.y);
-                const tips = [lm[8], lm[12], lm[16], lm[20]];
-                let avgDist = 0;
-                tips.forEach(t => avgDist += Math.hypot(t.x - wrist.x, t.y - wrist.y));
-                avgDist /= 4;
+                const wrist = lm[0];
+                const thumb = lm[4];
+                const index = lm[8];
+                const middle = lm[12];
+                const ring = lm[16];
+                const pinky = lm[20];
 
-                if (pinchDist < 0.05) {
-                    if (STATE.mode !== 'FOCUS') {
-                        STATE.mode = 'FOCUS';
-                        const photos = particleSystem.filter(p => p.type === 'PHOTO');
-                        if (photos.length) STATE.focusTarget = photos[Math.floor(Math.random() * photos.length)].mesh;
-                    }
-                } else if (avgDist < 0.25) {
-                    STATE.mode = 'TREE';
-                    STATE.focusTarget = null;
-                } else if (avgDist > 0.4) {
-                    STATE.mode = 'SCATTER';
-                    STATE.focusTarget = null;
+                const pinchDist = Math.hypot(thumb.x - index.x, thumb.y - index.y);
+                const isExt = (tip, base) => Math.hypot(tip.x - wrist.x, tip.y - wrist.y) > Math.hypot(base.x - wrist.x, base.y - wrist.y) * 1.2;
+
+                const indexExt = isExt(index, lm[6]);
+                const middleExt = isExt(middle, lm[10]);
+                const ringExt = isExt(ring, lm[14]);
+                const pinkyExt = isExt(pinky, lm[18]);
+                const count = [indexExt, middleExt, ringExt, pinkyExt].filter(v => v).length;
+
+                let detectedMode = STATE.mode;
+                if (pinchDist < 0.06) {
+                    detectedMode = 'FOCUS';
+                } else if (indexExt && middleExt && !ringExt && !pinkyExt) {
+                    detectedMode = 'HEART';
+                } else if (count === 0) {
+                    detectedMode = 'TREE';
+                } else if (count >= 3) {
+                    detectedMode = 'SCATTER';
                 }
+
+                // Debouncing: switch mode if stable for 3-5 detect cycles
+                ['TREE', 'SCATTER', 'HEART', 'FOCUS'].forEach(m => {
+                    if (m === detectedMode) gestureScore[m] = Math.min(gestureScore[m] + 1, 5);
+                    else gestureScore[m] = Math.max(gestureScore[m] - 1, 0);
+
+                    if (gestureScore[m] >= 3 && STATE.mode !== m) {
+                        STATE.mode = m;
+
+                        // Lock target when entering FOCUS
+                        if (m === 'FOCUS') {
+                            if (!STATE.focusTarget) {
+                                const photos = particleSystem.filter(p => p.type === 'PHOTO');
+                                if (photos.length) {
+                                    STATE.focusTarget = photos[Math.floor(Math.random() * photos.length)].mesh;
+                                }
+                            }
+                        } else {
+                            STATE.focusTarget = null;
+                        }
+
+                        // Clear other scores to prevent rapid switching
+                        Object.keys(gestureScore).forEach(k => { if (k !== m) gestureScore[k] = 0; });
+                    }
+                });
             } else {
                 STATE.hand.detected = false;
             }
@@ -686,6 +653,10 @@
                 if (STATE.mode === 'TREE') {
                     STATE.rotation.y += 0.3 * dt;
                     STATE.rotation.x += (0 - STATE.rotation.x) * 2.0 * dt;
+                } else if (STATE.mode === 'HEART') {
+                    // Heart stays still (lerp rotation to 0)
+                    STATE.rotation.y += (0 - STATE.rotation.y) * 2.0 * dt;
+                    STATE.rotation.x += (0 - STATE.rotation.x) * 2.0 * dt;
                 } else {
                     STATE.rotation.y += 0.1 * dt;
                 }
@@ -694,26 +665,15 @@
             mainGroup.rotation.y = STATE.rotation.y;
             mainGroup.rotation.x = STATE.rotation.x;
 
-            particleSystem.forEach(p => p.update(dt, STATE.mode, STATE.focusTarget));
+            const heartPulse = (STATE.mode === 'HEART') ? 1.0 + 0.12 * Math.pow(Math.sin(clock.elapsedTime * 3.8), 4) : 1.0;
+            particleSystem.forEach(p => p.update(dt, STATE.mode, STATE.focusTarget, heartPulse));
             composer.render();
         }
 
         init();
     </script>
 
-    <div style="
-    position: fixed; 
-    top: 20px; 
-    left: 20px; 
-    color: #FFD700; 
-    font-family: 'Arial', sans-serif; 
-    font-size: 24px; 
-    font-weight: bold; 
-    pointer-events: none; 
-    z-index: 99999; 
-    text-shadow: 0 0 10px #FFA500;
-    letter-spacing: 2px;
-">DatNQ</div>
+    <div class="signature">DatNQ</div>
 
 </body>
 
