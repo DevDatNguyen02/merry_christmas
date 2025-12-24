@@ -4,12 +4,12 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
-import { FilesetResolver, HandLandmarker } from '@mediapipe/tasks-vision';
+import { FilesetResolver, HandLandmarker, DrawingUtils } from '@mediapipe/tasks-vision';
 
 // --- CONFIGURATION ---
 const CONFIG = {
     colors: {
-        bg: 0x1a2a44,
+        bg: 0x000000,
         champagneGold: 0xffd966,
         vibrantGreen: 0x228b22,
         accentRed: 0x990000,
@@ -40,7 +40,7 @@ let mainGroup;
 let clock = new THREE.Clock();
 let particleSystem = [];
 let photoMeshGroup = new THREE.Group();
-let handLandmarker, video, webcamCanvas, webcamCtx;
+let handLandmarker, video, webcamCanvas, webcamCtx, drawingUtils;
 let caneTexture;
 const tmpVec = new THREE.Vector3(); // Reusable vector
 
@@ -72,7 +72,8 @@ function initThree() {
     scene.background = new THREE.Color(CONFIG.colors.bg);
     scene.fog = new THREE.FogExp2(CONFIG.colors.bg, 0.01);
 
-    camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const fov = window.innerWidth < window.innerHeight ? 65 : 42;
+    camera = new THREE.PerspectiveCamera(fov, window.innerWidth / window.innerHeight, 0.1, 1000);
     camera.position.set(0, 2, CONFIG.camera.z);
 
     renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: "high-performance" });
@@ -471,6 +472,7 @@ async function initMediaPipe() {
     webcamCanvas = document.getElementById('webcam-preview');
     webcamCtx = webcamCanvas.getContext('2d');
     webcamCanvas.width = 160; webcamCanvas.height = 120;
+    drawingUtils = new DrawingUtils(webcamCtx);
 
     const vision = await FilesetResolver.forVisionTasks(
         "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm"
@@ -500,8 +502,28 @@ async function predictWebcam() {
     if (video.currentTime !== lastVideoTime && now - lastDetectTime > DETECT_INTERVAL) {
         lastVideoTime = video.currentTime;
         lastDetectTime = now;
+
+        // Draw video frame to canvas
+        webcamCtx.drawImage(video, 0, 0, webcamCanvas.width, webcamCanvas.height);
+
         if (handLandmarker) {
             const result = handLandmarker.detectForVideo(video, now);
+
+            // Draw Hand Landmarks
+            if (result.landmarks && result.landmarks.length > 0) {
+                for (const landmarks of result.landmarks) {
+                    drawingUtils.drawConnectors(landmarks, HandLandmarker.HAND_CONNECTIONS, {
+                        color: "#00FF00",
+                        lineWidth: 2
+                    });
+                    drawingUtils.drawLandmarks(landmarks, {
+                        color: "#FFD700",
+                        lineWidth: 1,
+                        radius: 2
+                    });
+                }
+            }
+
             processGestures(result);
         }
     }
@@ -533,7 +555,11 @@ function processGestures(result) {
         const count = [indexExt, middleExt, ringExt, pinkyExt].filter(v => v).length;
 
         let detectedMode = STATE.mode;
-        if (pinchDist < 0.06) {
+        // Sensitivity: Increased pinch threshold to 0.08 for easier recognition
+        // Hysteresis: If already in FOCUS, allow 0.1 to stay in it
+        const pinchThreshold = (STATE.mode === 'FOCUS') ? 0.1 : 0.08;
+
+        if (pinchDist < pinchThreshold) {
             detectedMode = 'FOCUS';
         } else if (indexExt && middleExt && !ringExt && !pinkyExt) {
             detectedMode = 'HEART';
@@ -543,15 +569,15 @@ function processGestures(result) {
             detectedMode = 'SCATTER';
         }
 
-        // Debouncing: switch mode if stable for 3-5 detect cycles
+        // Debouncing: switch mode if stable for 5 detect cycles (more stable)
         ['TREE', 'SCATTER', 'HEART', 'FOCUS'].forEach(m => {
-            if (m === detectedMode) gestureScore[m] = Math.min(gestureScore[m] + 1, 5);
+            if (m === detectedMode) gestureScore[m] = Math.min(gestureScore[m] + 1, 8);
             else gestureScore[m] = Math.max(gestureScore[m] - 1, 0);
 
-            if (gestureScore[m] >= 3 && STATE.mode !== m) {
+            if (gestureScore[m] >= 5 && STATE.mode !== m) {
                 STATE.mode = m;
 
-                // Lock target when entering FOCUS
+                // Lock target when entering FOCUS - Random Selection
                 if (m === 'FOCUS') {
                     if (!STATE.focusTarget) {
                         const photos = particleSystem.filter(p => p.type === 'PHOTO');
@@ -574,6 +600,7 @@ function processGestures(result) {
 
 function setupEvents() {
     window.addEventListener('resize', () => {
+        camera.fov = window.innerWidth < window.innerHeight ? 65 : 42;
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
         renderer.setSize(window.innerWidth, window.innerHeight);
